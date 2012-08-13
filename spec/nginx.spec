@@ -8,7 +8,7 @@
 %define nginx_webroot   %{nginx_datadir}/html
 
 Name:           nginx
-Version:        1.2.1
+Version:        1.2.3
 Release:        1
 Summary:        Robust, small and high performance HTTP and reverse proxy server
 Group:          System Environment/Daemons   
@@ -34,7 +34,7 @@ Requires(preun):    chkconfig, initscripts
 Requires(postun):   initscripts
 Provides:           webserver
 
-Source0:    http://sysoev.ru/nginx/nginx-%{version}.tar.gz
+Source0:    http://nginx.org/download/nginx-%{version}.tar.gz
 Source1:    %{name}.init
 Source2:    %{name}.logrotate
 Source3:    virtual.conf
@@ -196,6 +196,9 @@ fi
 
 
 %changelog
+* Fri Aug 10 2012 Santi Saez <santi@woop.es> - 1.2.3-1
+- Upgrade to upstream nginx 1.2.3, issue #31 on GitHub (http://kcy.me/acls)
+
 * Tue Jun 19 2012 Santi Saez <santi@woop.es> - 1.2.1-1
 - Upgrade to upstream nginx 1.2.1
 
