@@ -2,7 +2,7 @@
 %define groupname  memcached
 
 Name:           memcached
-Version:        1.4.14
+Version:        1.4.15
 Release:        1
 Epoch:		0
 Summary:        High Performance, Distributed Memory Object Cache
@@ -132,7 +132,7 @@ exit 0
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING NEWS doc/CONTRIBUTORS doc/*.txt
+%doc AUTHORS ChangeLog COPYING NEWS README.md doc/CONTRIBUTORS doc/*.txt
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 
 %dir %attr(755,%{username},%{groupname}) %{_localstatedir}/run/memcached
@@ -147,6 +147,9 @@ exit 0
 %{_includedir}/memcached/*
 
 %changelog
+* Thu Dec 20 2012 Santi Saez <santi@woop.es> - 1.4.15-1
+- Upgrade to memcached 1.4.15, issue #39 on GitHub (http://kcy.me/dczm)
+
 * Mon Aug  6 2012 Santi Saez <santi@woop.es> - 1.4.14-1
 - Upgrade to upstream memcached 1.4.14, issue #30 on GitHub (http://kcy.me/aa61)
 
