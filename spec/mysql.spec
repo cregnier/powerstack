@@ -1,5 +1,5 @@
 Name: mysql
-Version: 5.5.27
+Version: 5.5.29
 Release: 1
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -198,7 +198,7 @@ rm -f Docs/mysql.info
 #%patch13 -p1
 #%patch14 -p1
 #%patch15 -p1
-%patch16 -p1
+#%patch16 -p1
 #%patch17 -p1
 
 #libtoolize --force
@@ -675,6 +675,10 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Tue Dec 25 2012 Santi Saez <santi@woop.es> - 5.5.29-1
+- Upgrade to MySQL 5.5.29, issue #44 on GitHub (http://kcy.me/dgwy)
+- mysql-chain-certs.patch removed
+
 * Sun Aug  5 2012 Santi Saez <santi@woop.es> - 5.5.27-1
 - Upgrade to upstream MySQL 5.5.27, issue #29 on GitHub (http://kcy.me/a935)
 
