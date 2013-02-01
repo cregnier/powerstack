@@ -6,7 +6,7 @@
 
 Summary: Apache HTTP Server
 Name: httpd
-Version: 2.2.22
+Version: 2.2.23
 Release: 1
 URL: http://httpd.apache.org/
 Source0: http://www.apache.org/dist/httpd/httpd-%{version}.tar.bz2
@@ -29,7 +29,7 @@ Patch5: httpd-2.1.10-layout.patch
 # Features/functional changes
 Patch20: httpd-2.2.14-release.patch
 Patch21: httpd-2.2.11-xfsz.patch
-Patch22: httpd-2.1.10-pod.patch
+#Patch22: httpd-2.1.10-pod.patch
 Patch23: httpd-2.0.45-export.patch
 Patch24: httpd-2.2.11-corelimit.patch
 Patch25: httpd-2.2.11-selinux.patch
@@ -130,7 +130,7 @@ Security (TLS) protocols.
 %patch5 -p1 -b .layout
 
 %patch21 -p1 -b .xfsz
-%patch22 -p1 -b .pod
+#%patch22 -p1 -b .pod
 %patch23 -p1 -b .export
 %patch24 -p1 -b .corelimit
 %patch25 -p1 -b .selinux
@@ -540,6 +540,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/httpd/build/*.sh
 
 %changelog
+* Fri Feb 1 2013 <santi@woop.es> - 2.2.23-1
+- Upgrade to Apache 2.2.23 (http://kcy.me/eruq)
+- httpd-2.1.10-pod.patch removed
+
 * Thu Feb 2 2012 Santi Saez <santi@woop.es> - 2.2.22-1
 - Upgrade to upstream Apache 2.2.22
 - Security fix: CVE-2011-3368, CVE-2011-3607, CVE-2011-4317
