@@ -1,5 +1,5 @@
 Name: mysql
-Version: 5.5.29
+Version: 5.6.10
 Release: 1
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -30,7 +30,7 @@ Source3: my.cnf
 Source4: scriptstub.c
 Source5: my_config.h
 Source6: README.mysql-docs
-Source9: mysql-embedded-check.c
+#Source9: mysql-embedded-check.c
 
 # PowerStack
 Source201: my.cnf-powerstack
@@ -54,11 +54,12 @@ Patch14: mysql-missing-string-code.patch
 Patch15: mysql-lowercase-bug.patch
 Patch16: mysql-chain-certs.patch
 Patch17: mysql-cve-2010-2008.patch
+Patch18: mysql-powerstack-68277.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gperf, perl, readline-devel, openssl-devel
 BuildRequires: gcc-c++, ncurses-devel, zlib-devel
-BuildRequires: libtool automake autoconf gawk
+BuildRequires: libtool automake autoconf gawk bison
 # make test requires time and ps
 BuildRequires: time procps
 # Socket and Time::HiRes are needed to run regression tests
@@ -200,6 +201,7 @@ rm -f Docs/mysql.info
 #%patch15 -p1
 #%patch16 -p1
 #%patch17 -p1
+%patch18 -p1
 
 #libtoolize --force
 #aclocal
@@ -259,7 +261,7 @@ cmake . -DBUILD_CONFIG=mysql_release \
 	-DENABLE_DTRACE=0 \
 	-DWITH_EMBEDDED_SERVER=ON \
 	-DWITH_READLINE=ON \
-%if 0%{?rhel} >= 5
+%if 0%{?rhel} > 5
 	-DWITH_SSL=system \
 %else
 	-DWITH_SSL=bundled \
@@ -280,16 +282,16 @@ ar -x ../libmysqld.a
 # http://bugs.mysql.com/bug.php?id=59104
 rm -f sql_binlog.cc.o rpl_utility.cc.o
 
-gcc $CFLAGS $LDFLAGS -shared -Wl,-soname,libmysqld.so.0 -o libmysqld.so.0.0.1 \
+gcc $CFLAGS $LDFLAGS -shared -Wl,-soname,libmysqld.c.o -o libmysqld.so.0.0.1 \
 	*.o \
 	-lpthread -lcrypt -lssl -lcrypto -lz -lrt -lstdc++ -lm -lc -laio
 
-# this is to check that we built a complete library
-cp %{SOURCE9} .
-ln -s libmysqld.so.0.0.1 libmysqld.so.0
-gcc -I../../include $CFLAGS mysql-embedded-check.c libmysqld.so.0
-LD_LIBRARY_PATH=. ldd ./a.out
-cd ../..
+# this is to check that we built a complete library <-- disabled by PowerStack
+#cp %{SOURCE9} .
+#ln -s libmysqld.so.0.0.1 libmysqld.so.0
+#gcc -I../../include $CFLAGS mysql-embedded-check.c libmysqld.so.0
+#LD_LIBRARY_PATH=. ldd ./a.out
+#cd ../..
 
 #make check
 
@@ -389,6 +391,7 @@ cp %{SOURCE6} README.mysql-docs
 # PowerStack
 rm -f ${RPM_BUILD_ROOT}%{_bindir}/mysqlaccess.conf
 rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/magic
+rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -498,6 +501,7 @@ fi
 %{_bindir}/msql2mysql
 %{_bindir}/mysql
 %{_bindir}/mysql_config
+%{_bindir}/mysql_config_editor
 %{_bindir}/mysql_find_rows
 %{_bindir}/mysql_waitpid
 %{_bindir}/mysqlaccess
@@ -512,6 +516,7 @@ fi
 
 %{_mandir}/man1/mysql.1*
 %{_mandir}/man1/mysql_config.1*
+%{_mandir}/man1/mysql_config_editor.1*
 %{_mandir}/man1/mysql_find_rows.1*
 %{_mandir}/man1/mysql_waitpid.1*
 %{_mandir}/man1/mysqlaccess.1*
@@ -559,6 +564,7 @@ fi
 %lang(es) %{_datadir}/mysql/spanish
 %lang(sv) %{_datadir}/mysql/swedish
 %lang(uk) %{_datadir}/mysql/ukrainian
+%lang(bg) %{_datadir}/mysql/bulgarian
 %{_datadir}/mysql/charsets
 
 %files server
@@ -631,13 +637,17 @@ fi
 #%{_mandir}/man8/mysqlmanager.8*
 
 %{_datadir}/mysql/errmsg-utf8.txt
+%{_datadir}/mysql/dictionary.txt
 %{_datadir}/mysql/fill_help_tables.sql
 #%{_datadir}/mysql/mysql_fix_privilege_tables.sql
 %{_datadir}/mysql/mysql_system_tables.sql
 %{_datadir}/mysql/mysql_system_tables_data.sql
 %{_datadir}/mysql/mysql_test_data_timezone.sql
+%{_datadir}/mysql/innodb_memcached_config.sql
+%{_datadir}/mysql/mysql_security_commands.sql
+
 %{_datadir}/mysql/my-*.cnf
-%{_datadir}/mysql/config.*.ini
+#%{_datadir}/mysql/config.*.ini
 
 /etc/rc.d/init.d/mysqld
 %attr(0755,mysql,mysql) %dir /var/run/mysqld
@@ -675,6 +685,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Mon Feb 25 2013 Santi Saez <santi@woop.es> - 5.6.10-1
+- Upgrade to MySQL 5.6.10 (http://kcy.me/fzyw)
+
 * Tue Dec 25 2012 Santi Saez <santi@woop.es> - 5.5.29-1
 - Upgrade to MySQL 5.5.29, issue #44 on GitHub (http://kcy.me/dgwy)
 - mysql-chain-certs.patch removed
