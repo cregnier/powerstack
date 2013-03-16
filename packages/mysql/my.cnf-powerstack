@@ -45,6 +45,11 @@ interactive_timeout = 60
 # http://dev.mysql.com/doc/refman/5.5/en/old-client.html
 #old_passwords = 1
 
+# Since MySQL 5.6.5 "secure-auth" mode is enabled by default blocking
+# connections by clients that attempt to use accounts that have passwords
+# stored in the old format (pre-4.1), this allows backward compatibility.
+skip-secure-auth
+
 
 # Do not resolve host names when checking client connections, use only IP
 # http://dev.mysql.com/doc/refman/5.5/en/dns.html
@@ -54,6 +59,13 @@ interactive_timeout = 60
 # IP address to bind to, by default MySQL listens on all interfaces
 # http://dev.mysql.com/doc/refman/5.5/en/can-not-connect-to-server.html
 #bind-address = 127.0.0.1
+
+
+# Since MySQL 5.6.6, "TIMESTAMP" data type "nonstandard" behaviors are
+# deprecated and the server logs a warning at startup ("[Warning] TIMESTAMP
+# with implicit DEFAULT value is deprecated"), this option modifies the
+# behavior of auto-updated temporal columns and enables backward compability.
+explicit_defaults_for_timestamp
 
 
 
@@ -241,4 +253,4 @@ innodb_flush_method = O_DIRECT
 
 # The size in bytes of each log file in a log group in InnoDB
 # http://dev.mysql.com/doc/refman/5.5/en/innodb-parameters.html#sysvar_innodb_log_file_size
-# innodb_log_file_size = 5M
+#innodb_log_file_size = 48M

@@ -1,6 +1,6 @@
 Name: mysql
 Version: 5.6.10
-Release: 1
+Release: 2
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
 URL: http://www.mysql.com
@@ -59,7 +59,7 @@ Patch18: mysql-powerstack-68277.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gperf, perl, readline-devel, openssl-devel
 BuildRequires: gcc-c++, ncurses-devel, zlib-devel
-BuildRequires: libtool automake autoconf gawk bison
+BuildRequires: libtool automake autoconf gawk
 # make test requires time and ps
 BuildRequires: time procps
 # Socket and Time::HiRes are needed to run regression tests
@@ -685,6 +685,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Sat Mar 16 2013 Santi Saez <santi@woop.es> - 5.6.10-2
+- skip-secure-auth and explicit_defaults_for_timestamp options added on my.cnf
+
 * Mon Feb 25 2013 Santi Saez <santi@woop.es> - 5.6.10-1
 - Upgrade to MySQL 5.6.10 (http://kcy.me/fzyw)
 
