@@ -1,0 +1,28 @@
+zlib has wrong name on TARGET_LINK_LIBRARIES, this patch fix this issue when
+building MySQL 5.6.10: "/usr/bin/ld: cannot find -lzlib" error, details:
+
+http://bugs.mysql.com/bug.php?id=68277
+https://github.com/santisaez/powerstack/issues/49
+
+diff -urN mysql-5.6.10.orig/mysys_ssl/CMakeLists.txt mysql-5.6.10/mysys_ssl/CMakeLists.txt
+--- mysql-5.6.10.orig/mysys_ssl/CMakeLists.txt	2013-01-22 17:54:49.000000000 +0100
++++ mysql-5.6.10/mysys_ssl/CMakeLists.txt	2013-03-07 14:06:01.580199512 +0100
+@@ -46,5 +46,5 @@
+    )
+ 
+ ADD_CONVENIENCE_LIBRARY(mysys_ssl ${MYSYS_SSL_SOURCES})
+-TARGET_LINK_LIBRARIES(mysys_ssl dbug strings ${SSL_LIBRARIES})
++TARGET_LINK_LIBRARIES(mysys_ssl dbug strings ${SSL_LIBRARIES} ${ZLIB_LIBRARY})
+ DTRACE_INSTRUMENT(mysys_ssl)
+diff -urN mysql-5.6.10.orig/storage/perfschema/unittest/CMakeLists.txt mysql-5.6.10/storage/perfschema/unittest/CMakeLists.txt
+--- mysql-5.6.10.orig/storage/perfschema/unittest/CMakeLists.txt	2013-01-22 17:54:49.000000000 +0100
++++ mysql-5.6.10/storage/perfschema/unittest/CMakeLists.txt		2013-03-07 14:05:37.492200087 +0100
+@@ -63,7 +63,7 @@
+ TARGET_LINK_LIBRARIES(pfs_connect_attr-t sql binlog rpl master slave sql)
+ TARGET_LINK_LIBRARIES(pfs_connect_attr-t mysys mysys_ssl)
+ TARGET_LINK_LIBRARIES(pfs_connect_attr-t vio ${SSL_LIBRARIES})
+-TARGET_LINK_LIBRARIES(pfs_connect_attr-t strings dbug regex mysys zlib)
++TARGET_LINK_LIBRARIES(pfs_connect_attr-t strings dbug regex mysys z)
+ ADD_TEST(pfs_connect_attr pfs_connect_attr-t)
+ 
+ # On windows, pfs_connect_attr-t may depend on openssl dlls.
