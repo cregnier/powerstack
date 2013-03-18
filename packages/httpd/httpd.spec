@@ -6,7 +6,7 @@
 
 Summary: Apache HTTP Server
 Name: httpd
-Version: 2.2.23
+Version: 2.2.24
 Release: 1
 URL: http://httpd.apache.org/
 Source0: http://www.apache.org/dist/httpd/httpd-%{version}.tar.bz2
@@ -540,6 +540,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/httpd/build/*.sh
 
 %changelog
+* Sun Mar 17 2013 <santi@woop.es> - 2.2.24-1
+- Upgrade to Apache 2.2.24 (http://kcy.me/h4ni)
+
 * Fri Feb 1 2013 <santi@woop.es> - 2.2.23-1
 - Upgrade to Apache 2.2.23 (http://kcy.me/eruq)
 - httpd-2.1.10-pod.patch removed
