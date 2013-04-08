@@ -8,7 +8,7 @@
 %define nginx_webroot   %{nginx_datadir}/html
 
 Name:           nginx
-Version:        1.2.6
+Version:        1.2.8
 Release:        1
 Summary:        Robust, small and high performance HTTP and reverse proxy server
 Group:          System Environment/Daemons   
@@ -196,6 +196,9 @@ fi
 
 
 %changelog
+* Mon Apr  8 2013 Santi Saez <santi@woop.es> - 1.2.8-1
+- Upgrade to nginx 1.2.8 (http://kcy.me/ifui)
+
 * Sun Dec 23 2012 Santi Saez <santi@woop.es> - 1.2.6-1
 - Upgrade to nginx 1.2.6, issue #41 on GitHub (http://kcy.me/dfw1)
 
