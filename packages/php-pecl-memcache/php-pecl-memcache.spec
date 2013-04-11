@@ -4,10 +4,10 @@
 
 %define pecl_name memcache
 
-Summary:      Extension to work with the Memcached caching daemon
+Summary:      PHP extension to work with the memcached caching daemon
 Name:         php-pecl-memcache
-Version:      3.0.6
-Release:      2
+Version:      3.0.8
+Release:      1
 License:      PHP
 Group:        Development/Languages
 URL:          http://pecl.php.net/package/%{pecl_name}
@@ -29,14 +29,11 @@ Requires:     php-api = %{php_apiver}
 %endif
 
 %description
-Memcached is a caching daemon designed especially for
-dynamic web applications to decrease database load by
-storing objects in memory.
+memcached is a caching daemon designed especially for dynamic web applications
+to decrease database load by storing objects in memory. This PHP extension
+allows you to work with memcached through handy OO and procedural interfaces.
 
-This extension allows you to work with memcached through
-handy OO and procedural interfaces.
-
-Memcache can be used as a PHP session handler.
+memcache can be used as a PHP session handler.
 
 
 %prep 
@@ -133,6 +130,9 @@ fi
 
 
 %changelog
+* Mon Apr  8 2013 Santi Saez <santi@woop.es> - 3.0.8-1
+- Upgrade to upstream 3.0.8 beta (http://kcy.me/ifyd)
+
 * Sat Mar 10 2012 Santi Saez <santi@woop.es> - 3.0.6-2
 - PHP 5.4.x ABI support mass rebuild
 
