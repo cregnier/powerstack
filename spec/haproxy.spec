@@ -5,21 +5,21 @@
 %define haproxy_datadir %{_datadir}/haproxy
 
 Name:           haproxy
-Version:        1.4.18
+Version:        1.4.23
 Release:        1
-Summary:        HA-Proxy is a TCP/HTTP reverse proxy for high availability environments
+Summary:        HAproxy is a TCP/HTTP reverse proxy for high availability environments
 
 Group:          System Environment/Daemons
 License:        GPLv2+
 
-URL:            http://haproxy.1wt.eu/
+URL:            http://haproxy.1wt.eu
 Source0:        http://haproxy.1wt.eu/download/1.4/src/haproxy-%{version}.tar.gz
 Source1:        %{name}.init
 Source2:        %{name}.cfg
 Source3:        %{name}.logrotate
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  pcre-devel 
+BuildRequires:  pcre-devel
 
 
 Requires(pre):      %{_sbindir}/useradd
@@ -28,7 +28,7 @@ Requires(preun):    /sbin/chkconfig, /sbin/service
 Requires(postun):   /sbin/service
 
 %description
-HA-Proxy is a TCP/HTTP reverse proxy which is particularly suited for high
+HAproxy is a TCP/HTTP reverse proxy which is particularly suited for high
 availability environments. Indeed, it can:
 - route HTTP requests depending on statically assigned cookies
 - spread the load among several servers while assuring server persistence
@@ -56,18 +56,11 @@ regparm_opts="USE_REGPARM=1"
 
 make %{?_smp_mflags} CPU="generic" TARGET="linux26" USE_PCRE=1 ${regparm_opts} ADDINC="%{optflags}" USE_LINUX_TPROXY=1
 
-# build the halog contrib program.  It has 2 version halog64 and halog.  Make
-# sure it is installed as 'halog' no matter what.
-halog="halog"
-%ifarch x86_64
-halog="halog64"
-%endif
-
+# Build halog, a contrib program to analyze HAproxy logs
 pushd contrib/halog
-make ${halog}
-mv ${halog} halog.tmp
-mv halog.tmp halog
+make halog
 popd
+
 
 %install
 rm -rf %{buildroot}
@@ -106,14 +99,14 @@ rm -rf %{buildroot}
 
 %post
 /sbin/chkconfig --add %{name}
-    
+  
 
 %preun
 if [ $1 = 0 ]; then
     /sbin/service %{name} stop >/dev/null 2>&1
     /sbin/chkconfig --del %{name}
-fi  
-    
+fi
+
 
 %postun
 if [ $1 -ge 1 ]; then
@@ -144,6 +137,9 @@ fi
 
 
 %changelog
+* Sun Apr 14 2013 Santi Saez <santi@woop.es> - 1.4.23-1
+- Upgrade to HAproxy 1.4.23
+
 * Thu Nov 24 2011 Santi Saez <santi@woop.es> - 1.4.18-1
 - Upgrade to upstream HAproxy 1.4.18 (EPEL-6 backport)
 
