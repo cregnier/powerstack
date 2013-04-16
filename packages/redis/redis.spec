@@ -13,6 +13,7 @@ Source0:          http://redis.googlecode.com/files/%{name}-%{version}.tar.gz
 Source1:          %{name}.logrotate
 Source2:          %{name}.init
 Patch0:           redis-2.6-conf.patch
+Patch1:           redis-2.6-disable-atomic.patch
 BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:    tcl
@@ -36,6 +37,7 @@ different kind of sorting abilities.
 %prep
 %setup -q
 %patch0 -p0
+%patch1 -p0
 
 %build
 make %{?_smp_mflags} \
@@ -98,6 +100,7 @@ fi
 %changelog
 * Sun Apr 14 2013 Santi Saez <santi@woop.es> - 2.6.12-1
 - Upgrade to Redis 2.6.12 (http://kcy.me/itc9)
+- GCC atomic builtins disabled on all target CPUs
 
 * Mon Jun  4 2012 Santi Saez <santi@woop.es> - 2.4.14-1
 - Upgrade to upstream Redis 2.4.14
