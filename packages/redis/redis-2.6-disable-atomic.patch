@@ -1,0 +1,17 @@
+Patch to disable GCC atomic builtins for all target processors on Redis 2.6,
+this prevents "zmalloc.c:223: undefined reference to __sync_add_and_fetch_4"
+error when building on GCC >= 4.1.0. PowerStack aims to provide RPM packages
+compatibe with i386 processors.
+
+--- src/config.h.orig	2013-04-16 19:44:59.460000063 +0200
++++ src/config.h	2013-04-16 19:46:41.526000512 +0200
+@@ -172,7 +172,8 @@
+ #if (__i386 || __amd64) && __GNUC__
+ #define GNUC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+ #if GNUC_VERSION >= 40100
+-#define HAVE_ATOMIC
++// GCC atomic builtins temporary disabled on all target processors (https://github.com/santisaez/powerstack/issues/62)
++//#define HAVE_ATOMIC
+ #endif
+ #endif
+ 

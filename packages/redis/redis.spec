@@ -2,7 +2,7 @@
 # http://code.google.com/p/redis/issues/detail?id=202
 
 Name:             redis
-Version:          2.4.14
+Version:          2.6.12
 Release:          1
 Summary:          A persistent key-value database
 
@@ -12,8 +12,8 @@ URL:              http://redis.io
 Source0:          http://redis.googlecode.com/files/%{name}-%{version}.tar.gz
 Source1:          %{name}.logrotate
 Source2:          %{name}.init
-# Update configuration for Fedora
-Patch0:           %{name}-2.2.2-redis.conf.patch
+Patch0:           redis-2.6-conf.patch
+Patch1:           redis-2.6-disable-atomic.patch
 BuildRoot:        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:    tcl
@@ -25,6 +25,7 @@ Requires(pre):    shadow-utils
 Requires(preun):  chkconfig
 Requires(preun):  initscripts
 
+
 %description
 Redis is an advanced key-value store. It is similar to memcached but the data
 set is not volatile, and values can be strings, exactly like in memcached, but
@@ -35,7 +36,8 @@ different kind of sorting abilities.
 
 %prep
 %setup -q
-%patch0 -p1
+%patch0 -p0
+%patch1 -p0
 
 %build
 make %{?_smp_mflags} \
@@ -96,6 +98,10 @@ fi
 %{_initrddir}/%{name}
 
 %changelog
+* Sun Apr 14 2013 Santi Saez <santi@woop.es> - 2.6.12-1
+- Upgrade to Redis 2.6.12 (http://kcy.me/itc9)
+- GCC atomic builtins disabled on all target CPUs
+
 * Mon Jun  4 2012 Santi Saez <santi@woop.es> - 2.4.14-1
 - Upgrade to upstream Redis 2.4.14
 
