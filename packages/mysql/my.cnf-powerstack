@@ -64,8 +64,8 @@ skip-secure-auth
 # Since MySQL 5.6.6, "TIMESTAMP" data type "nonstandard" behaviors are
 # deprecated and the server logs a warning at startup ("[Warning] TIMESTAMP
 # with implicit DEFAULT value is deprecated"), this option modifies the
-# behavior of auto-updated temporal columns and enables backward compability.
-explicit_defaults_for_timestamp
+# behavior of auto-updated temporal columns.
+#explicit_defaults_for_timestamp
 
 
 
