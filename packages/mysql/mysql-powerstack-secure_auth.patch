@@ -1,0 +1,52 @@
+MySQL 5.6.11 does not allow pre-4.1.1 password hashes although the server is
+started with "skip-secure-auth option" (secure-auth mode disabled), this patch
+enables this feature again, it's a mysql_init() backport from MySQL 5.6.10.
+
+mysql> SHOW VARIABLES LIKE 'secure_auth' ;
++---------------+-------+
+| Variable_name | Value |
++---------------+-------+
+| secure_auth   | OFF   |
++---------------+-------+
+
+$ mysql -uexample -pexample test
+ERROR 2049 (HY000): Connection using old (pre-4.1.1) authentication protocol refused (client option 'secure_auth' enabled)
+
+This bug has been also reported by Jørgen Thomsen: http://bugs.mysql.com/bug.php?id=69027
+
+Santi Saez 2013-04-22 / powerstack.org
+
+diff -urN mysql-5.6.11.orig/sql-common/client.c mysql-5.6.11/sql-common/client.c
+--- mysql-5.6.11.orig/sql-common/client.c	2013-04-05 14:27:18.000000000 +0200
++++ mysql-5.6.11/sql-common/client.c		2013-04-22 23:11:45.754001616 +0200
+@@ -4747,27 +4747,10 @@
+ 
+   if (mysql->passwd[0])
+   {
+-    /*
+-       If --secure-auth option is used, throw an error.
+-       Note that, we do not need to check for CLIENT_SECURE_CONNECTION
+-       capability of server. If server is not capable of handling secure
+-       connections, we would have raised error before reaching here.
+-
+-       TODO: Change following code to access MYSQL structure through
+-       client-side plugin service.
+-    */
+-    if (mysql->options.secure_auth)
+-    {
+-      set_mysql_error(mysql, CR_SECURE_AUTH, unknown_sqlstate);
++    char scrambled[SCRAMBLE_LENGTH_323 + 1];
++    scramble_323(scrambled, (char*)pkt, mysql->passwd);
++    if (vio->write_packet(vio, (uchar*)scrambled, SCRAMBLE_LENGTH_323 + 1))
+       DBUG_RETURN(CR_ERROR);
+-    }
+-    else
+-    {
+-      char scrambled[SCRAMBLE_LENGTH_323 + 1];
+-      scramble_323(scrambled, (char*)pkt, mysql->passwd);
+-      if (vio->write_packet(vio, (uchar*)scrambled, SCRAMBLE_LENGTH_323 + 1))
+-        DBUG_RETURN(CR_ERROR);
+-    }
+   }
+   else
+     if (vio->write_packet(vio, 0, 0)) /* no password */

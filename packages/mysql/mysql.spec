@@ -1,6 +1,6 @@
 Name: mysql
 Version: 5.6.11
-Release: 1
+Release: 2
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
 URL: http://www.mysql.com
@@ -54,6 +54,7 @@ Patch14: mysql-missing-string-code.patch
 Patch15: mysql-lowercase-bug.patch
 Patch16: mysql-chain-certs.patch
 Patch17: mysql-cve-2010-2008.patch
+Patch18: mysql-powerstack-secure_auth.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gperf, perl, readline-devel, openssl-devel
@@ -200,6 +201,7 @@ rm -f Docs/mysql.info
 #%patch15 -p1
 #%patch16 -p1
 #%patch17 -p1
+%patch18 -p1
 
 #libtoolize --force
 #aclocal
@@ -683,6 +685,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Mon Apr 22 2013 Santi Saez <santi@woop.es> - 5.6.11-2
+- mysql-powerstack-secure_auth.patch added to allow pre-4.1.1 passwords
+
 * Sat Apr 20 2013 Santi Saez <santi@woop.es> - 5.6.11-1
 - Upgrade to MySQL 5.6.11 (http://kcy.me/j6su)
 - explicit_defaults_for_timestamp config removed
