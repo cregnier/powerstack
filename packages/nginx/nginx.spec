@@ -8,7 +8,7 @@
 %define nginx_webroot   %{nginx_datadir}/html
 
 Name:           nginx
-Version:        1.2.8
+Version:        1.4.0
 Release:        1
 Summary:        Robust, small and high performance HTTP and reverse proxy server
 Group:          System Environment/Daemons   
@@ -50,6 +50,7 @@ Source104:  404.html
 # removes -Werror in upstream build scripts.  -Werror conflicts with
 # -D_FORTIFY_SOURCE=2 causing warnings to turn into errors.
 Patch0:     nginx-auto-cc-gcc.patch
+Patch1:     nginx-server-header.patch
 
 %description
 Nginx [engine x] is an HTTP(S) server, HTTP(S) reverse proxy and IMAP/POP3
@@ -59,6 +60,7 @@ proxy server written by Igor Sysoev.
 %setup -q
 
 %patch0 -p0
+%patch1 -p0
 
 %build
 # nginx does not utilize a standard configure script.  It has its own
@@ -98,6 +100,8 @@ export DESTDIR=%{buildroot}
     --with-http_stub_status_module \
     --with-http_perl_module \
     --with-http_mp4_module \
+    --with-http_spdy_module \
+    --with-http_gunzip_module \
     --with-mail \
 %if 0%{?rhel} >= 5
     --with-file-aio \
@@ -196,6 +200,9 @@ fi
 
 
 %changelog
+* Wed Apr 24 2013 Santi Saez <santi@woop.es> - 1.4.0-1
+- Upgrade to nginx 1.4.0 (http://kcy.me/jfws)
+
 * Mon Apr  8 2013 Santi Saez <santi@woop.es> - 1.2.8-1
 - Upgrade to nginx 1.2.8 (http://kcy.me/ifui)
 
