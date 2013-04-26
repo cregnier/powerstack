@@ -1,0 +1,25 @@
+Patch to customize "Server" header on nginx, used by PowerStack project for
+statistics and tracking purposes by services like Netcraft, Alexia, etc. Feel
+free to remove/skip from the nginx.spec file it if it bothers you.
+
+Explanation: "ngx_http_server_string" will be used to build the header if
+server_tokens=off, otherwise "ngx_http_server_full_string" will be used.
+
+Tip: the non-standard HttpHeadersMoreModule (http://kcy.me/jhlr) for nginx
+allows replacing "Server" string without patching/recompiling the source.
+
+Santi Saez 2013-04-25
+
+--- src/http/ngx_http_header_filter_module.c.orig	2013-02-18 14:50:52.000000000 +0100
++++ src/http/ngx_http_header_filter_module.c		2013-04-25 15:39:29.215000001 +0200
+@@ -46,8 +46,8 @@
+ };
+ 
+ 
+-static char ngx_http_server_string[] = "Server: nginx" CRLF;
+-static char ngx_http_server_full_string[] = "Server: " NGINX_VER CRLF;
++static char ngx_http_server_string[] = "Server: nginx (PowerStack)" CRLF;
++static char ngx_http_server_full_string[] = "Server: " NGINX_VER " (PowerStack)" CRLF;
+ 
+ 
+ static ngx_str_t ngx_http_status_lines[] = {
