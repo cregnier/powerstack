@@ -1,27 +1,29 @@
 %{!?__pecl: %{expand: %%global __pecl %{_bindir}/pecl}}
-%define php_extdir %(php-config --extension-dir 2>/dev/null || echo %{_libdir}/php4)                     
+%define php_extdir %(php-config --extension-dir 2>/dev/null || echo %{_libdir}/php4)
 %global php_zendabiver %((echo 0; php -i 2>/dev/null | sed -n 's/^PHP Extension => //p') | tail -1)
 %global php_version %((echo 0; php-config --version 2>/dev/null) | tail -1)
 %define pecl_name APC
 
 # svn checkout -r %{svn_revision} https://svn.php.net/repository/pecl/apc/trunk apc-svn-%{svn_revision}
 # tar czfv apc-svn-%{svn_revision}.tgz apc-svn-%{svn_revision}
-%global svn_revision	324546
+#%global svn_revision	324546
 
 Summary:       APC caches and optimizes PHP intermediate code
 Name:          php-pecl-apc
-Version:       3.1.9
-Release:       3
+Version:       3.1.13
+Release:       1
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/APC
-#Source:       http://pecl.php.net/get/APC-%{version}.tgz
-Source:        APC-%{version}-%{svn_revision}.tgz
+#Source:       APC-%{version}-%{svn_revision}.tgz
+Source:        http://pecl.php.net/get/APC-%{version}.tgz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}-root
-Conflicts:     php-mmcache php-eaccelerator
+Conflicts:     php-mmcache, php-eaccelerator
 BuildRequires: php-devel >= 5.1.0, httpd-devel, php-pear, pcre-devel
+
 Requires(post): %{__pecl}
 Requires(postun): %{__pecl}
+
 %if %{?php_zend_api}0
 # Require clean ABI/API versions if available (Fedora)
 Requires:      php(zend-abi) = %{php_zend_api}
@@ -37,8 +39,9 @@ Requires:      php = %{php_version}
 %endif
 Provides:      php-pecl(%{pecl_name}) = %{version}
 
-Requires(post): %{__pecl}
-Requires(postun): %{__pecl}
+# Use APC default configuration file provided by PowerStack
+Source1:	apc.ini
+
 
 %description
 APC is a free, open, and robust framework for caching and optimizing PHP
@@ -56,13 +59,13 @@ Files needed to compile programs using APC serializer
 
 
 %prep
-%setup -q -c 
+%setup -q -c
 
 
 %build
 
 # APC svn checkout?
-%if 0%{?svn_revision}
+%if 0%{?svn_revision:0}
 mv apc-svn-%{svn_revision}/package.xml .
 mv apc-svn-%{svn_revision} APC-%{version}
 %endif
@@ -87,84 +90,15 @@ pushd APC-%{version}
 %{__make} install INSTALL_ROOT=%{buildroot}
 
 # Fix the charset of NOTICE
-iconv -f iso-8859-1 -t utf8 NOTICE >NOTICE.utf8
+iconv -f iso-8859-1 -t utf8 NOTICE > NOTICE.utf8
 mv NOTICE.utf8 NOTICE
 
 popd
-# Install the package XML file
+# Install package XML file + apc.ini
 %{__mkdir_p} %{buildroot}%{pecl_xmldir}
 %{__install} -m 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
-
-# Drop in the bit of configuration
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/php.d
-%{__cat} > %{buildroot}%{_sysconfdir}/php.d/apc.ini << 'EOF'
-; Enable apc extension module
-extension = apc.so
-
-; Options for the APC module version >= 3.1.3
-
-; This can be set to 0 to disable APC. 
-apc.enabled=1
-; The number of shared memory segments to allocate for the compiler cache. 
-apc.shm_segments=1
-; The size of each shared memory segment in MB.
-apc.shm_size=64M
-; A "hint" about the number of distinct source files that will be included or 
-; requested on your web server. Set to zero or omit if you're not sure;
-apc.num_files_hint=1024
-; Just like num_files_hint, a "hint" about the number of distinct user cache
-; variables to store.  Set to zero or omit if you're not sure;
-apc.user_entries_hint=4096
-; The number of seconds a cache entry is allowed to idle in a slot in case this
-; cache entry slot is needed by another entry.
-apc.ttl=7200
-; use the SAPI request start time for TTL
-apc.use_request_time=1
-; The number of seconds a user cache entry is allowed to idle in a slot in case
-; this cache entry slot is needed by another entry.
-apc.user_ttl=7200
-; The number of seconds that a cache entry may remain on the garbage-collection list. 
-apc.gc_ttl=3600
-; On by default, but can be set to off and used in conjunction with positive
-; apc.filters so that files are only cached if matched by a positive filter.
-apc.cache_by_default=1
-; A comma-separated list of POSIX extended regular expressions.
-apc.filters
-; The mktemp-style file_mask to pass to the mmap module 
-apc.mmap_file_mask=/tmp/apc.XXXXXX
-; This file_update_protection setting puts a delay on caching brand new files.
-apc.file_update_protection=2
-; Setting this enables APC for the CLI version of PHP (Mostly for testing and debugging).
-apc.enable_cli=0
-; Prevents large files from being cached
-apc.max_file_size=1M
-; Whether to stat the main script file and the fullpath includes.
-apc.stat=1
-; Vertification with ctime will avoid problems caused by programs such as svn or rsync by making 
-; sure inodes havn't changed since the last stat. APC will normally only check mtime.
-apc.stat_ctime=0
-; Whether to canonicalize paths in stat=0 mode or fall back to stat behaviour
-apc.canonicalize=0
-; With write_lock enabled, only one process at a time will try to compile an 
-; uncached script while the other processes will run uncached
-apc.write_lock=1
-; Logs any scripts that were automatically excluded from being cached due to early/late binding issues.
-apc.report_autofilter=0
-; RFC1867 File Upload Progress hook handler
-apc.rfc1867=0
-apc.rfc1867_prefix =upload_
-apc.rfc1867_name=APC_UPLOAD_PROGRESS
-apc.rfc1867_freq=0
-apc.rfc1867_ttl=3600
-; Optimize include_once and require_once calls and avoid the expensive system calls used.
-apc.include_once_override=0
-apc.lazy_classes=00
-apc.lazy_functions=0
-; not documented
-apc.coredump_unmap=0
-apc.file_md5=0
-apc.preload_path
-EOF
+%{__install} -m 644 %{SOURCE1} %{buildroot}/etc/php.d/apc.ini
 
 
 %check
@@ -172,7 +106,7 @@ cd %{pecl_name}-%{version}
 TEST_PHP_EXECUTABLE=$(which php) php run-tests.php \
     -n -q -d extension_dir=modules \
     -d extension=apc.so \
-|| true  # 1 test fails http://pecl.php.net/bugs/bug.php?id=16793
+|| true # 1 test fails http://pecl.php.net/bugs/bug.php?id=16793
 
 
 %if 0%{?pecl_install:1}
@@ -202,11 +136,15 @@ fi
 %{php_extdir}/apc.so
 %{pecl_xmldir}/%{name}.xml
 
+
 %files devel
 %{_includedir}/php/ext/apc
 
 
 %changelog
+* Thu Apr 25 2013 Santi Saez <santi@woop.es> - 3.1.13-1
+- Upgrade to APC 3.1.3 (http://kcy.me/jid1)
+
 * Mon Mar 26 2012 Santi Saez <santi@woop.es> - 3.1.9-3
 - APC v3.1.9 is not compatible with PHP 5.4, pull changes from SVN revision 324546
 
@@ -258,7 +196,7 @@ fi
 - Updated to new upstream version
 
 * Mon Sep 11 2006 Chris Chabot <chabotc@xs4all.nl> - 3.0.10-5
-- FC6 rebuild 
+- FC6 rebuild
 
 * Sun Aug 13 2006 Chris Chabot <chabotc@xs4all.nl> - 3.0.10-4
 - FC6T2 rebuild
@@ -272,5 +210,5 @@ fi
 - Added Provices php-pecl(apc)
 
 * Sun Jun 18 2006 - Chris Chabot <chabotc@xs4all.nl> - 3.0.10-1
-- Initial package, templated on already existing php-json 
+- Initial package, templated on already existing php-json
   and php-eaccelerator packages
