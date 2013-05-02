@@ -2,7 +2,7 @@
 # http://code.google.com/p/redis/issues/detail?id=202
 
 Name:             redis
-Version:          2.6.12
+Version:          2.6.13
 Release:          1
 Summary:          A persistent key-value database
 
@@ -98,6 +98,9 @@ fi
 %{_initrddir}/%{name}
 
 %changelog
+* Wed May  1 2013 Santi Saez <santi@woop.es> - 2.6.13-1
+- Upgrade to Redis 2.6.13 (http://kcy.me/jujy)
+
 * Sun Apr 14 2013 Santi Saez <santi@woop.es> - 2.6.12-1
 - Upgrade to Redis 2.6.12 (http://kcy.me/itc9)
 - GCC atomic builtins disabled on all target CPUs
