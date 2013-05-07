@@ -8,7 +8,7 @@
 %define nginx_webroot   %{nginx_datadir}/html
 
 Name:           nginx
-Version:        1.4.0
+Version:        1.4.1
 Release:        1
 Summary:        Robust, small and high performance HTTP and reverse proxy server
 Group:          System Environment/Daemons   
@@ -200,6 +200,9 @@ fi
 
 
 %changelog
+* Tue May  7 2013 Santi Saez <santi@woop.es> - 1.4.1-1
+- Upgrade to nginx 1.4.1, fix CVE-2013-2028 (http://kcy.me/k77j)
+
 * Wed Apr 24 2013 Santi Saez <santi@woop.es> - 1.4.0-1
 - Upgrade to nginx 1.4.0 (http://kcy.me/jfws)
 
