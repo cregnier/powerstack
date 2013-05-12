@@ -16,7 +16,7 @@
 
 Summary: PHP scripting language for creating dynamic web sites
 Name: php
-Version: 5.4.14
+Version: 5.4.15
 Release: 1
 License: PHP
 Group: Development/Languages
@@ -1012,6 +1012,9 @@ fi
 %files mssql -f files.mssql
 
 %changelog
+* Sun May 12 2013 Santi Saez <santi@woop.es> - 5.4.15-1
+- Upgrade to PHP 5.4.15 (http://kcy.me/kdbq)
+
 * Fri Apr 12 2013 Santi Saez <santi@woop.es> - 5.4.14-1
 - Upgrade to PHP 5.4.14 (http://kcy.me/ioh3)
 
