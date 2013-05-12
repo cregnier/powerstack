@@ -5,14 +5,15 @@
 
 Summary:      Terminal screen handling and optimization package
 Name:         php-pecl-ncurses
-Version:      1.0.1
-Release:      2
+Version:      1.0.2
+Release:      1
 License:      PHP
 Group:        Development/Languages
 URL:          http://pecl.php.net/package/ncurses
 
 Source:       http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 Source2:      xml2changelog
+Source3:      ncurses.ini
 
 BuildRoot:    %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: php-devel, ncurses-devel, php-pear
@@ -35,10 +36,9 @@ line.
 
 
 
-%prep 
+%prep
 %setup -c -q
-%{_bindir}/php -n %{SOURCE2} package.xml >CHANGELOG
-
+%{_bindir}/php -n %{SOURCE2} package.xml > CHANGELOG
 cd %{pecl_name}-%{version}
 
 
@@ -46,7 +46,6 @@ cd %{pecl_name}-%{version}
 cd %{pecl_name}-%{version}
 phpize
 %configure --enable-ncursesw
-
 %{__make} %{?_smp_mflags}
 
 
@@ -55,15 +54,11 @@ cd %{pecl_name}-%{version}
 %{__rm} -rf %{buildroot}
 %{__make} install INSTALL_ROOT=%{buildroot}
 
-# Drop in the bit of configuration
+# php-pecl-ncurses configuration file
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/php.d
-%{__cat} > %{buildroot}%{_sysconfdir}/php.d/%{pecl_name}.ini << 'EOF'
-; Enable %{pecl_name} extension module
-extension=%{pecl_name}.so
-EOF
+%{__install} -m 644 %{SOURCE3} %{buildroot}/etc/php.d/ncurses.ini
 
-# Install XML package description
-# use 'name' rather than 'pecl_name' to avoid conflict with pear extensions
+# Install XML package description (use 'name' rather than 'pecl_name' to avoid conflict with PEAR extensions)
 %{__mkdir_p} %{buildroot}%{pecl_xmldir}
 %{__install} -m 644 ../package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 
@@ -102,6 +97,9 @@ fi
 
 
 %changelog
+* Sun May 12 2013 Santi Saez <santi@woop.es> - 1.0.2-1
+- Upgrade to php-pecl-ncurses 1.0.2 (http://kcy.me/kgyd)
+
 * Sat Mar 10 2012 Santi Saez <santi@woop.es> - 1.0.1-2
 - PHP 5.4.x ABI support mass rebuild
 
