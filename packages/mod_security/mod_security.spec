@@ -1,13 +1,16 @@
+%{!?_httpd_apxs:	%{expand: %%global _httpd_apxs %%{_sbindir}/apxs}}
+%{!?_httpd_confdir:	%{expand: %%global _httpd_confdir %%{_sysconfdir}/httpd/conf.d}}
+%{!?_httpd_moddir:	%{expand: %%global _httpd_moddir %%{_libdir}/httpd/modules}}
+
 Summary: Security module for the Apache HTTP Server
-Name: mod_security 
-Version: 2.5.12
-Release: 3
-License: GPLv2
-URL: http://www.modsecurity.org/
+Name: mod_security
+Version: 2.7.3
+Release: 1
+License: ASL 2.0
+URL: http://www.modsecurity.org
 Group: System Environment/Daemons
-Source: http://www.modsecurity.org/download/modsecurity-apache_%{version}.tar.gz
+Source: http://www.modsecurity.org/tarball/%{version}/modsecurity-apache_%{version}.tar.gz
 Source1: mod_security.conf
-Source2: modsecurity_localrules.conf
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: httpd httpd-mmn = %([ -a %{_includedir}/httpd/.mmn ] && cat %{_includedir}/httpd/.mmn || echo missing)
 BuildRequires: httpd-devel libxml2-devel pcre-devel curl-devel lua-devel
@@ -15,46 +18,44 @@ BuildRequires: httpd-devel libxml2-devel pcre-devel curl-devel lua-devel
 %description
 ModSecurity is an open source intrusion detection and prevention engine
 for web applications. It operates embedded into the web server, acting
-as a powerful umbrella - shielding web applications from attacks.
+as a powerful umbrella, shielding web applications from attacks.
 
 %prep
-
 %setup -n modsecurity-apache_%{version}
 
 %build
-cd apache2
-%configure
+%configure --with-apxs=%{_httpd_apxs}
 make %{_smp_mflags}
-make %{_smp_mflags} mlogc
 
 %install
 rm -rf %{buildroot}
-install -D -m755 apache2/.libs/mod_security2.so %{buildroot}/%{_libdir}/httpd/modules/mod_security2.so
-install -D -m644 %{SOURCE1} %{buildroot}/%{_sysconfdir}/httpd/conf.d/mod_security.conf
-install -d %{buildroot}/%{_sysconfdir}/httpd/modsecurity.d/
-install -D -m644 rules/*.conf %{buildroot}/%{_sysconfdir}/httpd/modsecurity.d/
-cp -R rules/base_rules %{buildroot}/%{_sysconfdir}/httpd/modsecurity.d/
-cp -R rules/optional_rules %{buildroot}/%{_sysconfdir}/httpd/modsecurity.d/
-install -D -m644 %{SOURCE2} %{buildroot}/%{_sysconfdir}/httpd/modsecurity.d/modsecurity_localrules.conf
-install -Dp tools/mlogc %{buildroot}/%{_bindir}/mlogc
-install -D -m644 apache2/mlogc-src/mlogc-default.conf %{buildroot}/%{_sysconfdir}/mlogc.conf
+
+install -d %{buildroot}%{_sbindir}
+install -d %{buildroot}%{_bindir}
+install -d %{buildroot}%{_httpd_moddir}
+install -d %{buildroot}%{_sysconfdir}/httpd/modsecurity.d
+install -d %{buildroot}%{_sysconfdir}/httpd/modsecurity.d/activated_rules
+install -m0755 apache2/.libs/mod_security2.so %{buildroot}%{_httpd_moddir}/mod_security2.so
+install -d -m0755 %{buildroot}%{_httpd_confdir}
+install -m0644 %{SOURCE1} %{buildroot}%{_httpd_confdir}/mod_security.conf
+install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}
 
 %clean
 rm -rf %{buildroot}
 
 %files
 %defattr (-,root,root)
-%doc rules/util CHANGES LICENSE README.* modsecurity* doc MODSECURITY_LICENSING_EXCEPTION
-%{_libdir}/httpd/modules/mod_security2.so
-%{_bindir}/mlogc
-%config(noreplace) %{_sysconfdir}/mlogc.conf
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/mod_security.conf
+%doc CHANGES LICENSE README.TXT NOTICE
+%{_httpd_moddir}/mod_security2.so
+%config(noreplace) %{_httpd_confdir}/*.conf
 %dir %{_sysconfdir}/httpd/modsecurity.d
-%{_sysconfdir}/httpd/modsecurity.d/optional_rules
-%{_sysconfdir}/httpd/modsecurity.d/base_rules
-%config(noreplace) %{_sysconfdir}/httpd/modsecurity.d/*.conf
+%dir %{_sysconfdir}/httpd/modsecurity.d/activated_rules
+%attr(770,apache,root) %dir %{_localstatedir}/lib/%{name}
 
 %changelog
+* Tue May 21 2013 Santi Saez <santi@woop.es> - 2.7.3-1
+- Upgrade to ModSecurity 2.7.3 (http://kcy.me/l0n8)
+
 * Mon Mar 19 2012 Santi Saez <santi@woop.es> - 2.5.12-3
 - ModSecurity 2.5.12 backport from EPEL-6
 
