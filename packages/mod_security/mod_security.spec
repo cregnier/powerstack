@@ -17,7 +17,7 @@ License: ASL 2.0
 URL: http://www.modsecurity.org
 Group: System Environment/Daemons
 Source: http://www.modsecurity.org/tarball/%{version}/modsecurity-apache_%{version}.tar.gz
-Source1: mod_security.conf
+Source1: mod_security.conf-apache
 # http://xmlsoft.org/sources/old/libxml2-%{libxml2_version}.tar.gz
 Source100: libxml2-%{libxml2_version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
