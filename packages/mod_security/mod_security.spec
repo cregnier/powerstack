@@ -2,6 +2,13 @@
 %{!?_httpd_confdir:	%{expand: %%global _httpd_confdir %%{_sysconfdir}/httpd/conf.d}}
 %{!?_httpd_moddir:	%{expand: %%global _httpd_moddir %%{_libdir}/httpd/modules}}
 
+# mod_security >= 2.7.0 requires libxml2 >= 2.6.29, building ModSecurity 2.7.x
+# on CentOS-5 will raise an error on "./configure" step since this release is
+# shipped with libxml2=2.6.26. This requirement is only necessary at build time,
+# so we use a bundled libxml2 library on CentOS-5, details: http://kcy.me/l0n8
+%define libxml2_version 2.6.29
+%define libxml2_build_path %{_tmppath}/libxml2-%{libxml2_version}
+
 Summary: Security module for the Apache HTTP Server
 Name: mod_security
 Version: 2.7.3
@@ -11,6 +18,8 @@ URL: http://www.modsecurity.org
 Group: System Environment/Daemons
 Source: http://www.modsecurity.org/tarball/%{version}/modsecurity-apache_%{version}.tar.gz
 Source1: mod_security.conf
+# http://xmlsoft.org/sources/old/libxml2-%{libxml2_version}.tar.gz
+Source100: libxml2-%{libxml2_version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: httpd httpd-mmn = %([ -a %{_includedir}/httpd/.mmn ] && cat %{_includedir}/httpd/.mmn || echo missing)
 BuildRequires: httpd-devel libxml2-devel pcre-devel curl-devel lua-devel
@@ -23,8 +32,20 @@ as a powerful umbrella, shielding web applications from attacks.
 %prep
 %setup -n modsecurity-apache_%{version}
 
+%if 0%{?rhel} == 5
+tar xfvz %{SOURCE100}
+cd libxml2-%{libxml2_version}
+./configure --prefix=%{libxml2_build_path}
+make
+make install
+%endif
+
 %build
+%if 0%{?rhel} == 5
+%configure --with-apxs=%{_httpd_apxs} --with-libxml=%{libxml2_build_path}
+%else
 %configure --with-apxs=%{_httpd_apxs}
+%endif
 make %{_smp_mflags}
 
 %install
@@ -42,6 +63,9 @@ install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}
 
 %clean
 rm -rf %{buildroot}
+%if 0%{?rhel} == 5
+rm -rf %{libxml2_build_path}
+%endif
 
 %files
 %defattr (-,root,root)
@@ -55,6 +79,7 @@ rm -rf %{buildroot}
 %changelog
 * Tue May 21 2013 Santi Saez <santi@woop.es> - 2.7.3-1
 - Upgrade to ModSecurity 2.7.3 (http://kcy.me/l0n8)
+- mod_security >= 2.7.0 requires libxml2 >= 2.6.29, use bundled library on CentOS-5
 
 * Mon Mar 19 2012 Santi Saez <santi@woop.es> - 2.5.12-3
 - ModSecurity 2.5.12 backport from EPEL-6
