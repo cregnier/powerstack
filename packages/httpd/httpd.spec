@@ -7,7 +7,7 @@
 Summary: Apache HTTP Server
 Name: httpd
 Version: 2.2.24
-Release: 1
+Release: 2
 URL: http://httpd.apache.org/
 Source0: http://www.apache.org/dist/httpd/httpd-%{version}.tar.bz2
 Source1: index.html
@@ -46,8 +46,10 @@ Patch69: httpd-2.2.0-authnoprov.patch
 Patch70: httpd-2.2.15-ssloidval.patch
 Patch71: httpd-2.2.15-davputfail.patch
 Patch72: httpd-2.2.15-expectnoka.patch
+
 # Security fixes
-Patch200: httpd-2.2.15-CVE-2010-1452.patch
+Patch201: mod_rewrite-cve-2013-1862.patch
+
 License: ASL 2.0
 Group: System Environment/Daemons
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -148,7 +150,7 @@ Security (TLS) protocols.
 %patch71 -p1 -b .davputfail
 #%patch72 -p1 -b .expectnoka
 
-#%patch200 -p1 -b .cve1452
+%patch201 -p0 -b .mod_rewrite
 
 # Patch in vendor/release string
 sed "s/@VENDOR@/%{vstring}/;s/@RELEASE@/%{release}/" < %{PATCH20} | patch -p1 -b -z .release
@@ -540,6 +542,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/httpd/build/*.sh
 
 %changelog
+* Fri May 31 2013 <santi@woop.es> - 2.2.24-2
+- Security fix CVE-2013-1862, mod_rewrite log vulnerability (http://kcy.me/lq7g)
+
 * Sun Mar 17 2013 <santi@woop.es> - 2.2.24-1
 - Upgrade to Apache 2.2.24 (http://kcy.me/h4ni)
 
