@@ -1,27 +1,23 @@
 Summary: HA monitor built upon LVS, VRRP and service pollers
 Name: keepalived
-Version: 1.2.2
+Version: 1.2.7
 Release: 1
 License: GPLv2+
 Group: Applications/System
-URL: http://www.keepalived.org/
+URL: http://www.keepalived.org
 Source0: http://www.keepalived.org/software/keepalived-%{version}.tar.gz
 Source1: keepalived.init
-Patch0: keepalived-1.1.14-installmodes.patch
-Patch1: keepalived-1.1.19-fix-ipvs-loading.patch
-Patch2: keepalived-1.2.2-rhel-5.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires(post): /sbin/chkconfig
 Requires(preun): /sbin/service, /sbin/chkconfig
 Requires(postun): /sbin/service
-BuildRequires: openssl-devel
-# We need both of these for proper LVS support
-BuildRequires: kernel, kernel-devel
+BuildRequires: kernel, kernel-devel, openssl-devel, gcc
+
 # We need popt, popt-devel is split out of rpm in Fedora 8+ and RHEL 6+
 %if 0%{?fedora} >= 8 || 0%{?rhel} >= 6
 BuildRequires: popt-devel
 %endif
-BuildRequires: gcc
+
 
 %description
 The main goal of the keepalived project is to add a strong & robust keepalive
@@ -38,13 +34,10 @@ healthchecks and LVS directors failover.
 
 %prep
 %setup -q
-%patch0 -p1 -b .installmodes
-%patch1 -p1 -b .fix-ipvs-loading
-%patch2 -p1 -b .rhel-5
 
 
 %build
-# Get the most recent available kernel build dir, allows to expand arch too
+# Get the most recent available kernel build directory
 KERNELDIR=$(ls -1d --sort t /lib/modules/*/build | head -1)
 %configure --with-kernel-dir="${KERNELDIR}"
 %{__make} %{?_smp_mflags} STRIP=/bin/true
@@ -53,11 +46,12 @@ KERNELDIR=$(ls -1d --sort t /lib/modules/*/build | head -1)
 %install
 %{__rm} -rf %{buildroot}
 %{__make} install DESTDIR=%{buildroot}
-# Remove "samples", as we include them in %%doc
-%{__rm} -rf %{buildroot}%{_sysconfdir}/keepalived/samples/
+
+# Remove Keepalived config examples, we include them in %doc
+%{__rm} -rf %{buildroot}%{_sysconfdir}/keepalived/samples
+
 # Overwrite the init script with our LSB compliant one
-%{__install} -p -m 0755 %{SOURCE1} \
-    %{buildroot}%{_sysconfdir}/rc.d/init.d/keepalived
+%{__install} -p -m 0755 %{SOURCE1} %{buildroot}%{_sysconfdir}/rc.d/init.d/keepalived
 
 
 %check
@@ -76,11 +70,13 @@ fi
 %post
 /sbin/chkconfig --add keepalived
 
+
 %preun
 if [ $1 -eq 0 ]; then
     /sbin/service keepalived stop &>/dev/null || :
     /sbin/chkconfig --del keepalived
 fi
+
 
 %postun
 #if [ $1 -ge 1 ]; then
@@ -91,26 +87,29 @@ fi
 %files
 %defattr(-,root,root,-)
 %doc AUTHOR ChangeLog CONTRIBUTORS COPYING README TODO
-%doc doc/keepalived.conf.SYNOPSIS doc/samples/
-%dir %{_sysconfdir}/keepalived/
-%config(noreplace) %{_sysconfdir}/keepalived/keepalived.conf
-%config(noreplace) %{_sysconfdir}/sysconfig/keepalived
+%doc doc/keepalived.conf.SYNOPSIS doc/samples
+%dir %{_sysconfdir}/keepalived
+%attr(0640, root, root) %config(noreplace) %{_sysconfdir}/keepalived/keepalived.conf
+%attr(0644, root, root) %config(noreplace) %{_sysconfdir}/sysconfig/keepalived
 %{_sysconfdir}/rc.d/init.d/keepalived
 %{_bindir}/genhash
-%{_sbindir}/keepalived
+%attr(0755, root, root) %{_sbindir}/keepalived
 %{_mandir}/man1/genhash.1*
 %{_mandir}/man5/keepalived.conf.5*
 %{_mandir}/man8/keepalived.8*
 
 
 %changelog
+* Sat Jun  1 2013 Santi Saez <santi@woop.es> - 1.2.7-1
+- Upgrade to upstream Keepalived 1.2.7 (http://kcy.me/lrtm)
+
 * Tue Nov 22 2011 Santi Saez <santi@woop.es> - 1.2.2-1
 - Upgrade to upstream Keepalived 1.2.2
-- keepalived-1.2.2-rhel-5.patch added to allow compile on RHEL-5
+- keepalived-1.2.2-rhel-5.patch added to fix RHEL-5 build issues
 - Disable service restart on RPM upgrade
 
 * Thu Apr 28 2011 Santi Saez <santi@woop.es> - 1.2.1-1
-- Backport from EPEL-6 and update to 1.2.1
+- Backport .spec from EPEL-6 and update to upstream Keepalived 1.2.1
 
 * Sun May 23 2010 Matthias Saou <http://freshrpms.net/> 1.1.20-1
 - Update to 1.1.20 (#589923).
