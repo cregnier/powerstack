@@ -1,11 +1,10 @@
 Name: mysql
-Version: 5.6.11
-Release: 2
+Version: 5.6.12
+Release: 1
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
 URL: http://www.mysql.com
-# exceptions allow client libraries to be linked with most open source SW,
-# not only GPL code.
+# Exceptions allow client libraries to be linked with most open source software, not only GPL code
 License: GPLv2 with exceptions
 
 # Regression tests take a long time, you can skip 'em with this
@@ -35,48 +34,31 @@ Source6: README.mysql-docs
 # PowerStack
 Source201: my.cnf-powerstack
 
-# Working around perl dependency checking bug in rpm FTTB. Remove later.
+# Working around Perl dependency checking bug in rpm FTTB, remove later
 Source999: filter-requires-mysql.sh
 
-Patch1: mysql-ssl-multilib.patch
-Patch2: mysql-errno.patch
-# Patch3: mysql-stack.patch
-Patch4: mysql-testing.patch
-Patch5: mysql-install-test.patch
-Patch6: mysql-stack-guard.patch
-Patch7: mysql-plugin-bug.patch
-Patch8: mysql-setschedparam.patch
-Patch9: mysql-no-docs.patch
-Patch10: mysql-strmov.patch
-Patch12: mysql-cve-2008-7247.patch
-Patch13: mysql-expired-certs.patch
-Patch14: mysql-missing-string-code.patch
-Patch15: mysql-lowercase-bug.patch
-Patch16: mysql-chain-certs.patch
-Patch17: mysql-cve-2010-2008.patch
-Patch18: mysql-powerstack-secure_auth.patch
+# PowerStack specific patches
+Patch201: mysql-powerstack-secure_auth.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: gperf, perl, readline-devel, openssl-devel
 BuildRequires: gcc-c++, ncurses-devel, zlib-devel
 BuildRequires: libtool automake autoconf gawk
-# make test requires time and ps
 BuildRequires: time procps
 # Socket and Time::HiRes are needed to run regression tests
 BuildRequires: perl(Socket), perl(Time::HiRes)
-# CMake build framework and Asynchronous I/O (AIO) library  are needed to build MySQL 5.5.x
+# CMake build framework and Asynchronous I/O (AIO) library are needed to build MySQL 5.5.x
 BuildRequires: cmake, libaio-devel
 
-Requires: grep, fileutils
+Requires: bash, grep, fileutils
 Requires: %{name}-libs = %{version}-%{release}
-Requires: bash
 
 # MySQL (with caps) is upstream's spelling of their own RPMs for mysql
 Conflicts: MySQL
 # mysql-cluster used to be built from this SRPM, but no more
 Obsoletes: mysql-cluster < 5.1.44
 
-# Working around perl dependency checking bug in rpm FTTB. Remove later.
+# Working around Perl dependency checking bug in rpm FTTB, remove later
 %global __perl_requires %{SOURCE999}
 
 %description
@@ -182,36 +164,15 @@ the MySQL sources.
 %prep
 %setup -q -n mysql-%{version}
 
+# PowerStack specific patches
+%patch201 -p1
+
 # Remove 'Docs/mysql.info' which is not freely redistributable
 rm -f Docs/mysql.info
 
-#%patch1 -p1
-%patch2 -p1
-#%patch3 -p1
-#%patch4 -p1
-#%patch5 -p1
-#%patch6 -p1
-#%patch7 -p1
-#%patch8 -p1
-#%patch9 -p1
-#%patch10 -p1
-#%patch12 -p1
-#%patch13 -p1
-#%patch14 -p1
-#%patch15 -p1
-#%patch16 -p1
-#%patch17 -p1
-%patch18 -p1
-
-#libtoolize --force
-#aclocal
-#automake --add-missing -Wno-portability
-#autoconf
-#autoheader
 
 %build
-
-# fail quickly and obviously if user tries to build as root
+# Fail quickly and obviously if user tries to build as root
 %if %runselftest
 	if [ x"`id -u`" = x0 ]; then
 		echo "mysql's regression tests fail if run as root."
@@ -286,13 +247,6 @@ gcc $CFLAGS $LDFLAGS -shared -Wl,-soname,libmysqld.c.o -o libmysqld.so.0.0.1 \
 	*.o \
 	-lpthread -lcrypt -lssl -lcrypto -lz -lrt -lstdc++ -lm -lc -laio
 
-# this is to check that we built a complete library <-- disabled by PowerStack
-#cp %{SOURCE9} .
-#ln -s libmysqld.so.0.0.1 libmysqld.so.0
-#gcc -I../../include $CFLAGS mysql-embedded-check.c libmysqld.so.0
-#LD_LIBRARY_PATH=. ldd ./a.out
-#cd ../..
-
 #make check
 
 %if %runselftest
@@ -318,8 +272,7 @@ rm -rf $RPM_BUILD_ROOT
 
 make DESTDIR=$RPM_BUILD_ROOT install
 
-# multilib header hacks
-# we only apply this to known Red Hat multilib arches, per bug #181335
+# Multilib header hacks, we only apply this to known Red Hat multilib arches, per bug #181335
 case `uname -i` in
   i386 | x86_64 | ppc | ppc64 | s390 | s390x | sparc | sparc64 )
     mv $RPM_BUILD_ROOT/usr/include/mysql/my_config.h $RPM_BUILD_ROOT/usr/include/mysql/my_config_`uname -i`.h
@@ -332,7 +285,7 @@ esac
 mkdir -p $RPM_BUILD_ROOT/var/log
 touch $RPM_BUILD_ROOT/var/log/mysqld.log
 
-# List the installed tree for RPM package maintenance purposes.
+# List the installed tree for RPM package maintenance purposes
 find $RPM_BUILD_ROOT -print | sed "s|^$RPM_BUILD_ROOT||" | sort > ROOTFILES
 
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
@@ -398,7 +351,6 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %pre
-
 # Comment obsolete constructs in MySQL >= 5.5.3 or update to alternatives
 # http://dev.mysql.com/doc/refman/5.5/en/news-5-5-3.html
 /bin/sed \
@@ -419,7 +371,6 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/ldconfig
 
 %post server
-
 /bin/chmod 0755 /var/lib/mysql
 /bin/chown mysql:mysql /var/run/mysqld
 /bin/touch /var/log/mysqld.log
@@ -432,11 +383,11 @@ function powerstack_mysql_upgrade() {
 
 		# Check access to MySQL
 		if `/usr/bin/mysql -e 'SELECT VERSION()' mysql &> /dev/null` ; then
-			/usr/bin/mysql_upgrade &> /dev/null
+			/usr/bin/mysql_upgrade --version-check &> /dev/null
 		else
 			# If Plesk is installed obtain MySQL password from .psa.shadow file
 			if `/bin/rpm -q --quiet psa` ; then
-				/usr/bin/mysql_upgrade --upgrade-system-tables -uadmin -p`cat /etc/psa/.psa.shadow` &> /dev/null
+				/usr/bin/mysql_upgrade --version-check --upgrade-system-tables -uadmin -p`cat /etc/psa/.psa.shadow` &> /dev/null
 
 			# Unable to access MySQL
 			else
@@ -685,6 +636,10 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Tue Jun  4 2013 Santi Saez <santi@woop.es> - 5.6.12-1
+- Upgrade to upstream MySQL 5.6.12 (http://kcy.me/lz2b)
+- --version-check option added to powerstack_mysql_upgrade() function
+
 * Mon Apr 22 2013 Santi Saez <santi@woop.es> - 5.6.11-2
 - mysql-powerstack-secure_auth.patch added to allow pre-4.1.1 passwords
 
@@ -731,7 +686,7 @@ fi
 
 * Wed Sep 14 2011 Santi Saez <santi@woop.es> - 5.5.15-1
 - Update to MySQL 5.5.15
-- fix #1 (drop powerstack_mysql_upgrade on fresh installation)
+- Fix #1 (drop powerstack_mysql_upgrade on fresh installation)
 
 * Tue Jul 12 2011 Santi Saez <santi@woop.es> - 5.5.14-1
 - Updated to MySQL 5.5.14
