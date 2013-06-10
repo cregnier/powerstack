@@ -9,9 +9,13 @@
 %define libxml2_version 2.6.29
 %define libxml2_build_path %{_tmppath}/libxml2-%{libxml2_version}
 
+# Switch to configure if mlogc RPM should be created
+%{!?with_mlogc:%global with_mlogc 1}
+
+
 Summary: Security module for the Apache HTTP Server
 Name: mod_security
-Version: 2.7.3
+Version: 2.7.4
 Release: 1
 License: ASL 2.0
 URL: http://www.modsecurity.org
@@ -24,10 +28,25 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: httpd httpd-mmn = %([ -a %{_includedir}/httpd/.mmn ] && cat %{_includedir}/httpd/.mmn || echo missing)
 BuildRequires: httpd-devel libxml2-devel pcre-devel curl-devel lua-devel
 
+
 %description
 ModSecurity is an open source intrusion detection and prevention engine
 for web applications. It operates embedded into the web server, acting
 as a powerful umbrella, shielding web applications from attacks.
+
+
+%if %with_mlogc
+%package -n	mlogc
+Summary:	ModSecurity Audit Log Collector
+Group:		System Environment/Daemons
+Requires:	mod_security
+
+
+%description -n mlogc
+This package contains the ModSecurity Audit Log Collector used to connect a
+ModSecurity sensor to the central audit log repository.
+%endif
+
 
 %prep
 %setup -n modsecurity-apache_%{version}
@@ -40,6 +59,7 @@ make
 make install
 %endif
 
+
 %build
 %if 0%{?rhel} == 5
 %configure --with-apxs=%{_httpd_apxs} --with-libxml=%{libxml2_build_path}
@@ -47,6 +67,7 @@ make install
 %configure --with-apxs=%{_httpd_apxs}
 %endif
 make %{_smp_mflags}
+
 
 %install
 rm -rf %{buildroot}
@@ -61,11 +82,22 @@ install -d -m0755 %{buildroot}%{_httpd_confdir}
 install -m0644 %{SOURCE1} %{buildroot}%{_httpd_confdir}/mod_security.conf
 install -m 700 -d $RPM_BUILD_ROOT%{_localstatedir}/lib/%{name}
 
+# mlogc
+%if %with_mlogc
+install -d %{buildroot}%{_localstatedir}/log/mlogc
+install -d %{buildroot}%{_localstatedir}/log/mlogc/data
+install -m0755 mlogc/mlogc %{buildroot}%{_bindir}/mlogc
+install -m0755 mlogc/mlogc-batch-load.pl %{buildroot}%{_bindir}/mlogc-batch-load
+install -m0644 mlogc/mlogc-default.conf %{buildroot}%{_sysconfdir}/mlogc.conf
+%endif
+
+
 %clean
 rm -rf %{buildroot}
 %if 0%{?rhel} == 5
 rm -rf %{libxml2_build_path}
 %endif
+
 
 %files
 %defattr (-,root,root)
@@ -76,7 +108,26 @@ rm -rf %{libxml2_build_path}
 %dir %{_sysconfdir}/httpd/modsecurity.d/activated_rules
 %attr(770,apache,root) %dir %{_localstatedir}/lib/%{name}
 
+
+%if %with_mlogc
+%files -n mlogc
+%defattr (-,root,root)
+%attr(0755,root,root) %dir %{_localstatedir}/log/mlogc
+%attr(0770,root,apache) %dir %{_localstatedir}/log/mlogc/data
+%doc mlogc/INSTALL
+%attr(0640,root,apache) %config(noreplace) %{_sysconfdir}/mlogc.conf
+%attr(0755,root,root) %{_bindir}/mlogc
+%attr(0755,root,root) %{_bindir}/mlogc-batch-load
+%endif
+
+
 %changelog
+* Mon Jun 10 2013 Santi Saez <santi@woop.es> - 2.7.4-1
+- Upgrade to ModSecurity 2.7.4 (http://kcy.me/m7y4)
+- mlogc now is distributed in a separate package
+- libinjection project added as a new @detectSQLi operator
+- CVE-2013-2765 security fix
+
 * Tue May 21 2013 Santi Saez <santi@woop.es> - 2.7.3-1
 - Upgrade to ModSecurity 2.7.3 (http://kcy.me/l0n8)
 - mod_security >= 2.7.0 requires libxml2 >= 2.6.29, use bundled library on CentOS-5
