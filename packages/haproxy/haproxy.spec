@@ -5,7 +5,7 @@
 %define haproxy_datadir %{_datadir}/haproxy
 
 Name:           haproxy
-Version:        1.4.23
+Version:        1.4.24
 Release:        1
 Summary:        HAproxy is a TCP/HTTP reverse proxy for high availability environments
 
@@ -137,6 +137,10 @@ fi
 
 
 %changelog
+* Thu Jun 20 2013 Santi Saez <santi@woop.es> - 1.4.24-1
+- Upgrade to HAproxy 1.4.24 (http://kcy.me/myyp)
+- CVE-2013-2175 fix: DoS in parsing HTTP headers
+
 * Sun Apr 14 2013 Santi Saez <santi@woop.es> - 1.4.23-1
 - Upgrade to HAproxy 1.4.23
 
